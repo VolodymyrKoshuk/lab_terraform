@@ -1,5 +1,6 @@
 provider "aws" {}
 
+
 module "ec2-instance" {
   source   = "terraform-aws-modules/ec2-instance/aws"
   version  = "4.3.0"
@@ -12,8 +13,9 @@ module "ec2-instance" {
   key_name                    = "vova-key-linuxaws-prod-stokholm"
   associate_public_ip_address = false
   iam_instance_profile        = "AmazonSSMRoleForInstancesQuickSetup"
-  vpc_security_group_ids = [aws_security_group.private.id]
-  
+  vpc_security_group_ids      = [aws_security_group.private.id]
+  subnet_id                   = module.vpc.private_subnets[*]
+ 
   putin_khuylo                = true
 
   root_block_device = [
