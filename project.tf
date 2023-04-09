@@ -14,7 +14,7 @@ module "ec2-instance" {
   associate_public_ip_address = false
   iam_instance_profile        = "AmazonSSMRoleForInstancesQuickSetup"
   vpc_security_group_ids      = [aws_security_group.private.id]
-  subnet_id                   = module.vpc.private_subnets[*]
+  subnet_id                   = module.vpc.private_subnets[1]
  
   putin_khuylo                = true
 
@@ -39,8 +39,10 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "4.0.1"
   
-  name = "my_SSU_VPC"
+  name = "My_SSU_VPC"
   cidr = "10.2.0.0/16"
+  create_igw = true
+  putin_khuylo = true
 
 # Config Aviability Zone and Subnet
   azs             = ["eu-north-1a", "eu-north-1c"]
@@ -88,8 +90,36 @@ module "vpc" {
     Role = "private"
   }
 
+  igw_tags = {
+    Name = "IGW for VPC of SSU"
+  }
+
+  nat_eip_tags = {
+    Name = "EIPs for NAT GW in VPC of SSU"
+  }
+
+  nat_gateway_tags = {
+    Name = "NAT GW for Private Subnet in VPC of SSU"
+  }
+
+  default_route_table_tags = {
+    Name = "Default Route Table for VPC of SSU"
+  }
+
+  private_route_table_tags = {
+    Name = "Route Table for Private Subnet"
+  }
+
+  public_route_table_tags = {
+    Name = "Route Table for Public Subnet"
+  }
+
   default_security_group_tags = {
     Name = "Default Security Group SSU"
+  }
+
+  default_network_acl_tags    = {
+    Name = "Default ACL for VPC of SSU"
   }
 }
 
@@ -133,6 +163,14 @@ resource "aws_security_group" "public" {
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
   }
+
+  tags = {
+    Name = "Security Group for Server of Public Subnet"
+    Role = "Public"
+    Terraform = true
+    education = true
+    course    = "devops4sysadmins"
+  }
 }
 
 
@@ -156,5 +194,13 @@ resource "aws_security_group" "private" {
     to_port          = 0
     protocol         = "-1"
     cidr_blocks      = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Security Group for Server of Private Subnet"
+    Role = "Private"
+    Terraform = true
+    education = true
+    course    = "devops4sysadmins"
   }
 }
