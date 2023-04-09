@@ -13,6 +13,7 @@ module "ec2-instance" {
   associate_public_ip_address = false
   iam_instance_profile        = "AmazonSSMRoleForInstancesQuickSetup"
   vpc_security_group_ids = [aws_security_group.private.id]
+  
   putin_khuylo                = true
 
   root_block_device = [
