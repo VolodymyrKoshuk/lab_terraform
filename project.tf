@@ -1,7 +1,43 @@
 provider "aws" {}
 
+# Create Public Server
+module "ec2-instance-public" {
+  source   = "terraform-aws-modules/ec2-instance/aws"
+  version  = "4.3.0"
+  for_each = toset(["first"]) # Meta-argument for create 1 servers
 
-module "ec2-instance" {
+  name     = "Pablic LinuxAWS Server"
+
+  ami                         = "ami-0cbfcdb45dcced1ca"
+  instance_type               = "t3.micro"
+  key_name                    = "vova-key-linuxaws-prod-stokholm"
+  associate_public_ip_address = true
+  iam_instance_profile        = "AmazonSSMRoleForInstancesQuickSetup"
+  vpc_security_group_ids      = [aws_security_group.public.id]
+  subnet_id                   = module.vpc.public_subnets[1]
+ 
+  putin_khuylo                = true
+
+  root_block_device = [
+    {
+      volume_type           = "gp3"
+      volume_size           = "10"
+      delete_on_termination = "true"
+    }
+  ]
+
+  tags = {
+    Name      = "Public LinuxAWS Server #${each.key}"
+    Terraform = true
+    education = true
+    course    = "devops4sysadmins"
+  }
+}
+
+
+
+# Create Private Server
+module "ec2-instance-private" {
   source   = "terraform-aws-modules/ec2-instance/aws"
   version  = "4.3.0"
   for_each = toset(["first", "second"]) # Meta-argument for create 2 servers
