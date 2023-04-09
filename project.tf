@@ -12,6 +12,7 @@ module "ec2-instance" {
   key_name                    = "vova-key-linuxaws-prod-stokholm"
   associate_public_ip_address = false
   iam_instance_profile        = "AmazonSSMRoleForInstancesQuickSetup"
+  vpc_security_group_ids = [""]
   putin_khuylo                = true
 
   root_block_device = [
@@ -28,7 +29,7 @@ module "ec2-instance" {
   }
 }
 
-/*
+
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "4.0.1"
@@ -43,6 +44,27 @@ module "vpc" {
   enable_nat_gateway     = true
   single_nat_gateway     = false
   one_nat_gateway_per_az = true
+
+  # Default Security Group
+  default_security_group_name = "Default_Security_Grop_SSU"
+  default_security_group_ingress = [{
+    description      = "Default ingress SG for SSU"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    cidr_blocks      = "10.2.0.0/16"
+  }]
+  default_security_group_egress = [{
+    description      = "Default egress SG for SSU"
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = "0.0.0.0/0"
+  }]
+
+  default_security_group_tags = {
+    Name = "Default Security Group SSU"
+  }
 
   tags = {
     Name      = "My_SSU_VPC"
@@ -62,4 +84,3 @@ module "vpc" {
     Role = "private"
   }
 }
-*/
