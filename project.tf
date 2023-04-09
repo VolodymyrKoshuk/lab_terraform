@@ -21,10 +21,18 @@ module "ec2-instance" {
     }
   ]
 
-
   tags = {
     Name = "Linux AWS Server #${each.key}"
     Terraform = true
   }
+}
 
+
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "4.0.1"
+  
+  name = "my_SSU_VPC"
+
+  azs = [""]
 }
