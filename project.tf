@@ -4,34 +4,24 @@ provider "aws" {}
 module "ec2-instance-public" {
   source   = "terraform-aws-modules/ec2-instance/aws"
   version  = "4.3.0"
-  for_each = toset(["first"]) # Meta-argument for create 1 servers
+  for_each = toset(var.number_of_public_servers) # Meta-argument to create multiple servers
 
-  name     = "Pablic LinuxAWS Server"
+  name     = var.name_public_server
 
-  ami                         = "ami-0cbfcdb45dcced1ca"
-  instance_type               = "t3.micro"
-  key_name                    = "vova-key-linuxaws-prod-stokholm"
-  associate_public_ip_address = true
-  iam_instance_profile        = "AmazonSSMRoleForInstancesQuickSetup"
+  ami                         = var.ami_public_server
+  instance_type               = var.instance_type_public_server
+  key_name                    = var.key_name_public_server
+  associate_public_ip_address = var.associate_pub_ip_public_server
+  iam_instance_profile        = var.iam_instance_profile_public_server
   vpc_security_group_ids      = [aws_security_group.public.id]
-  subnet_id                   = module.vpc.public_subnets[1]
+  subnet_id                   = module.vpc.public_subnets[var.subnet_to_public_server]
  
   putin_khuylo                = true
 
-  root_block_device = [
-    {
-      volume_type           = "gp3"
-      volume_size           = "10"
-      delete_on_termination = "true"
-    }
-  ]
+  root_block_device = var.rbd_to_public_server
 
-  tags = {
-    Name      = "Public LinuxAWS Server #${each.key}"
-    Terraform = true
-    education = true
-    course    = "devops4sysadmins"
-  }
+
+  tags = var.default_tags_to_public_server
 }
 
 
@@ -40,34 +30,23 @@ module "ec2-instance-public" {
 module "ec2-instance-private" {
   source   = "terraform-aws-modules/ec2-instance/aws"
   version  = "4.3.0"
-  for_each = toset(["first", "second"]) # Meta-argument for create 2 servers
+  for_each = toset(var.number_of_private_servers) # Meta-argument for create multiple servers
 
-  name     = "Private LinuxAWS Server"
+  name     = var.name_private_server
 
-  ami                         = "ami-0cbfcdb45dcced1ca"
-  instance_type               = "t3.micro"
-  key_name                    = "vova-key-linuxaws-prod-stokholm"
-  associate_public_ip_address = false
-  iam_instance_profile        = "AmazonSSMRoleForInstancesQuickSetup"
+  ami                         = var.ami_private_server
+  instance_type               = var.instance_type_private_server
+  key_name                    = var.key_name_private_server
+  associate_public_ip_address = var.associate_pub_ip_private_server
+  iam_instance_profile        = var.iam_instance_profile_private_server
   vpc_security_group_ids      = [aws_security_group.private.id]
-  subnet_id                   = module.vpc.private_subnets[1]
+  subnet_id                   = module.vpc.private_subnets[var.subnet_to_private_server]
  
   putin_khuylo                = true
 
-  root_block_device = [
-    {
-      volume_type           = "gp3"
-      volume_size           = "10"
-      delete_on_termination = "true"
-    }
-  ]
+  root_block_device = var.rbd_to_private_server
 
-  tags = {
-    Name      = "Private LinuxAWS Server #${each.key}"
-    Terraform = true
-    education = true
-    course    = "devops4sysadmins"
-  }
+  tags = var.default_tags_to_private_server
 }
 
 
@@ -75,95 +54,54 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "4.0.1"
   
-  name = "My_SSU_VPC"
-  cidr = "10.2.0.0/16"
-  create_igw = true
+  name = var.vpc_name
+  cidr = var.cidr_block_vpc
+  create_igw = var.igw_vpc
   putin_khuylo = true
 
 # Config Aviability Zone and Subnet
-  azs             = ["eu-north-1a", "eu-north-1c"]
-  public_subnets  = ["10.2.11.0/24", "10.2.21.0/24"]
-  private_subnets = ["10.2.12.0/24", "10.2.22.0/24"]
+  azs             = var.azs_to_vpc
+  public_subnets  = var.cidr_public_subnets_to_vpc
+  private_subnets = var.cidr_private_subnets_to_vpc
 
 # Config NAT Gateway
-  enable_nat_gateway     = true
-  single_nat_gateway     = false
-  one_nat_gateway_per_az = true
+  enable_nat_gateway     = var.create_nat_gw_to_vpc
+  single_nat_gateway     = var.single_nat_gw_to_vpc
+  one_nat_gateway_per_az = var.one_nat_gw_per_azs_vpc
 
   # Default Security Group
-  default_security_group_name = "Default_Security_Grop_SSU"
-  default_security_group_ingress = [{
-    description      = "Default ingress SG for SSU"
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = "10.2.0.0/16"
-  }]
-  default_security_group_egress = [{
-    description      = "Default egress SG for SSU"
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = "10.2.0.0/16"
-  }]
+  default_security_group_name = var.def_sg_name_vpc
+  default_security_group_ingress = var.def_sg_ingress_vpc
+  default_security_group_egress = var.def_sg_egress_vpc
 
 # All Tags in VPC
-  tags = {
-    Name      = "My_SSU_VPC"
-    Terraform = true
-    education = true
-    course    = "devops4sysadmins"
-  }
+  tags = var.common_tags_to_vpc
 
-  public_subnet_tags  = {
-    Name = "My_public_subnet_SSU"
-    Terraform = true
-    Role = "public"
-  }
-  private_subnet_tags = {
-    Name = "My_private_subnet_SSU"
-    Terraform = true
-    Role = "private"
-  }
+  public_subnet_tags  = var.pub_sub_tags_vpc
+  private_subnet_tags = var.pri_sub_tags_vpc
 
-  igw_tags = {
-    Name = "IGW for VPC of SSU"
-  }
+  igw_tags = var.igw_tags_vpc
 
-  nat_eip_tags = {
-    Name = "EIPs for NAT GW in VPC of SSU"
-  }
+  nat_eip_tags = var.nat_eip_tags_vpc
 
-  nat_gateway_tags = {
-    Name = "NAT GW for Private Subnet in VPC of SSU"
-  }
+  nat_gateway_tags = var.nat_tags_vpc
 
-  default_route_table_tags = {
-    Name = "Default Route Table for VPC of SSU"
-  }
+  default_route_table_tags = var.def_route_table_tags_vpc
 
-  private_route_table_tags = {
-    Name = "Route Table for Private Subnet"
-  }
+  private_route_table_tags = var.pri_route_table_tags_vpc
 
-  public_route_table_tags = {
-    Name = "Route Table for Public Subnet"
-  }
+  public_route_table_tags = var.pub_route_table_tags_vpc
 
-  default_security_group_tags = {
-    Name = "Default Security Group SSU"
-  }
+  default_security_group_tags = var.def_sg_tags_vpc
 
-  default_network_acl_tags    = {
-    Name = "Default ACL for VPC of SSU"
-  }
+  default_network_acl_tags    = var.def_acl_tags_vpc
 }
 
 
 # Create Public SG for VPC of SSU
 resource "aws_security_group" "public" {
   vpc_id = module.vpc.vpc_id
-  name   = "Security Group for Server of Public Subnet"
+  name   = var.name_public_sg
 
 # Rule for SSH conection
   ingress {
@@ -213,7 +151,7 @@ resource "aws_security_group" "public" {
 # Create Private SG for VPC of SSU
 resource "aws_security_group" "private" {
   vpc_id = module.vpc.vpc_id
-  name   = "Security Group for Server of Private Subnet"
+  name   = var.name_private_sg
 
 # Rule for SSH conection
   ingress {
@@ -232,11 +170,5 @@ resource "aws_security_group" "private" {
     cidr_blocks      = ["0.0.0.0/0"]
   }
 
-  tags = {
-    Name = "Security Group for Server of Private Subnet"
-    Role = "Private"
-    Terraform = true
-    education = true
-    course    = "devops4sysadmins"
-  }
+  tags = var.tags_private_sg
 }
