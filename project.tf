@@ -6,7 +6,7 @@ module "ec2-instance-public" {
   version  = "4.3.0"
   for_each = toset(["first"]) # Meta-argument for create 1 servers
 
-  name     = "Pablic LinuxAWS Server"
+  name     = "Public LinuxAWS Server"
 
   ami                         = "ami-0cbfcdb45dcced1ca"
   instance_type               = "t3.micro"
