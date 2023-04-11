@@ -1,7 +1,7 @@
 # Variables to module ec-2-instance-public
 
 variable "number_of_public_servers" {
-    description = "variable to multiple create public servers"
+    description = "variable to multiple create public servers with for_each meta-argument"
     type = list
     default = ["first"]
 }
@@ -73,7 +73,7 @@ variable "default_tags_to_public_server" {
 # Variables to module ec-2-instance-private
 
 variable "number_of_private_servers" {
-    description = "variable to multiple create private servers"
+    description = "variable to multiple create private servers with for_each meta-argument"
     type = list
     default = ["first", "second"]
 }

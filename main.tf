@@ -1,11 +1,10 @@
-
 # Create Public Server
 module "ec2-instance-public" {
   source   = "terraform-aws-modules/ec2-instance/aws"
   version  = "4.3.0"
   for_each = toset(var.number_of_public_servers) # Meta-argument to create multiple servers
 
-  name     = var.name_public_server
+  name     = "${var.name_public_server} #${each.value}"
 
   ami                         = var.ami_public_server
   instance_type               = var.instance_type_public_server
@@ -31,7 +30,7 @@ module "ec2-instance-private" {
   version  = "4.3.0"
   for_each = toset(var.number_of_private_servers) # Meta-argument for create multiple servers
 
-  name     = var.name_private_server
+  name     = "${var.name_private_server} #${each.value}"
 
   ami                         = var.ami_private_server
   instance_type               = var.instance_type_private_server
