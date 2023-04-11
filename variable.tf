@@ -336,6 +336,30 @@ variable "name_public_sg" {
     default = "Security Group for Servers of Public Subnet"
 }
 
+variable "ingress_port_to_public_sg" {
+    description = "List ingress port to public servers"
+    type = list(string)
+    default = ["80", "443"]
+}
+
+variable "cidr_to_ingress_port_to_public_sg" {
+    description = "CIDR Block to ingress ports to public servers"
+    type = list(string)
+    default = ["0.0.0.0/0"]
+}
+
+variable "cidr_to_ssh_for_public_sg" {
+    description = "CIDR block to SSH Connection to Public servers"
+    type = list(string)
+    default = ["0.0.0.0/0"]
+}
+
+variable "cidr_to_egress_trafic_to_public_sg" {
+    description = "CIDR Block to egress trafic to public servers"
+    type = list(string)
+    default = ["0.0.0.0/0"]
+}
+
 variable "tags_pub_sg" {
     description = "Tags to public Seurity Group"
     type = map
@@ -353,6 +377,18 @@ variable "name_private_sg" {
     description = "Name to private Security Group"
     type = string
     default = "Security Group for Servers of Private Subnet"
+}
+
+variable "cidr_to_ssh_for_private_sg" {
+    description = "CIDR block to SSH Connection to Private servers"
+    type = list(string)
+    default = ["10.2.0.0/16"]
+}
+
+variable "cidr_to_egress_trafic_to_private_sg" {
+    description = "CIDR Block to egress trafic to private servers"
+    type = list(string)
+    default = ["0.0.0.0/0"]
 }
 
 variable "tags_private_sg" {

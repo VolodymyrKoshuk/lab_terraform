@@ -101,39 +101,35 @@ resource "aws_security_group" "public" {
   vpc_id = module.vpc.vpc_id
   name   = var.name_public_sg
 
+#Rules to ingress trafic
+  dynamic "ingress" {
+    for_each = var.ingress_port_to_public_sg
+
+    content {
+      from_port        = ingress.value
+      to_port          = ingress.value
+      protocol         = "tcp"
+      cidr_blocks      = var.cidr_to_ingress_port_to_public_sg
+    }
+  }
+
+
 # Rule for SSH conection
   ingress {
     description      = "SSH Port"
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    cidr_blocks      = var.cidr_to_ssh_for_public_sg
   }
 
-# Rule for HTTP conection
-  ingress {
-    description      = "HTTP Port"
-    from_port        = 80
-    to_port          = 80
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
 
-# Rule for HTTPS conection
-  ingress {
-    description      = "HTTPS Port"
-    from_port        = 443
-    to_port          = 443
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
-
-# Rule for egress to all intenet
+# Rule for egress to all internet
   egress {
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    cidr_blocks      = var.cidr_to_egress_trafic_to_public_sg
   }
 
   tags = {
@@ -157,7 +153,7 @@ resource "aws_security_group" "private" {
     from_port        = 22
     to_port          = 22
     protocol         = "tcp"
-    cidr_blocks      = ["10.2.0.0/16"]
+    cidr_blocks      = var.cidr_to_ssh_for_private_sg
   }
 
 # Rule for egress to all intenet
@@ -165,7 +161,7 @@ resource "aws_security_group" "private" {
     from_port        = 0
     to_port          = 0
     protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    cidr_blocks      = var.cidr_to_egress_trafic_to_private_sg
   }
 
   tags = var.tags_private_sg
